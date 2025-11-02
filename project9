@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    options { timestamps() }
+
+    stages {
+        stage('Run') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        // Linux / macOS path
+                        sh '''
+                            echo "Running main step..."
+                            sleep 1
+                        '''
+                    } else {
+                        // Windows path — fixed timeout issue
+                        bat '''
+                            @echo off
+                            echo Running main step...
+                            powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Sleep -Seconds 1"
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Build succeeded: ${env.BUILD_URL}"
+        }
+        failure {
+            echo "❌ Build failed: ${env.BUILD_URL}"
+        }
+    }
+}
